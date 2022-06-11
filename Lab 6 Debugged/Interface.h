@@ -138,7 +138,6 @@ void Start()
 		case 12:
 			return;
 		}
-
 		std::cout << '\n';
 	}
 }

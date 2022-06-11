@@ -15,7 +15,7 @@ int HashTable::Search(std::string word)
 	int hashOne = Hash(word, m_hashKey, m_hashKey + 1);
 	int hashTwo = Hash(word, m_hashKey, m_hashKey - 1);
 
-	for (int i = 0; i < m_table.size(); i++)
+	for (int i = 0; i < m_hashKey; i++)
 	{
 		if (hashOne < m_table.size())
 		{
@@ -99,7 +99,10 @@ void HashTable::Rehash()
 
 	for (int i = 0; i < m_table.size(); i++)
 	{
-		if (table[i].first) AddInto(table[i].second, table);
+		if (m_table[i].first)
+		{
+			AddInto(table[i].second, table);
+		}
 	}
 
 	m_table.clear();

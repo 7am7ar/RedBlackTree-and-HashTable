@@ -32,6 +32,8 @@ bool RedBlackTree::LoadText(std::string fileName)
 
 bool RedBlackTree::AddNode(std::string word)
 {
+	std::transform(word.begin(), word.end(), word.begin(), tolower);
+
 	if (m_nodeQuantity == 0)
 	{
 		m_nodeQuantity++;
@@ -265,6 +267,13 @@ bool RedBlackTree::RemoveNode(std::string word)
 	}
 	else
 	{
+		if (m_nodeQuantity == 1)
+		{
+			delete m_crown;
+			m_nodeQuantity--;
+			return true;
+		}
+
 		Node * currentNode = m_crown;
 		bool isFound = false;
 
@@ -292,6 +301,7 @@ bool RedBlackTree::RemoveNode(std::string word)
 
 		// If node was found, delete it
 		DeleteNode(currentNode);
+		m_nodeQuantity--;
 		return true;
 	}
 }
@@ -414,6 +424,8 @@ void RedBlackTree::DeleteNode(Node * nodeToRemove)
 
 void RedBlackTree::RemoveBalance(Node* deleted)
 {
+	if (deleted->GetPrevious() == nullptr) return;
+
 	Node* parent = deleted->GetPrevious();
 	// Deleted is on the right
 	if (deleted->GetParentBrunchDirection() == "Right")
@@ -438,6 +450,7 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					{
 						parent->SetColor(Black);
 						RemoveBalance(deleted);
+						parent->GetPrevious()->SetColor(Red);
 					}
 				}
 				// Left child has left red child
@@ -525,6 +538,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					temp->SetPrevious(parent->GetNextLeft());
 					parent->GetNextLeft()->SetParentBrunchDirection("Left");
 
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
+
 					temp = parent->GetNextRight();
 					temp->SetParentBrunchDirection("Left");
 
@@ -535,6 +557,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					parent->GetNextRight()->SetNextLeft(temp);
 					temp->SetPrevious(parent->GetNextRight());
 					parent->GetNextRight()->SetParentBrunchDirection("Right");
+
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
 				}
 			}
 			//Left child is black
@@ -560,6 +591,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					temp->SetPrevious(parent->GetNextLeft());
 					parent->GetNextLeft()->SetParentBrunchDirection("Left");
 
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
+
 					temp = parent->GetNextRight();
 					temp->SetParentBrunchDirection("Left");
 
@@ -570,6 +610,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					parent->GetNextRight()->SetNextLeft(temp);
 					temp->SetPrevious(parent->GetNextRight());
 					parent->GetNextRight()->SetParentBrunchDirection("Right");
+
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
 				}
 				else
 				{
@@ -578,6 +627,34 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					{
 						parent->SetColor(Red);
 						RemoveBalance(parent->GetPrevious());
+					}
+					// Left grandchild is red
+					else
+					{
+						parent->GetNextLeft()->SetColor(Red);
+						parent->GetPrevious()->SetColor(Red);
+
+						Node* temp = parent->GetNextRight();
+						temp->SetParentBrunchDirection("Left");
+
+						parent->SetParentBrunchDirection(parent->GetPrevious()->GetParentBrunchDirection());
+						parent->SetNextRight(parent->GetPrevious());
+						parent->SetPrevious(parent->GetPrevious()->GetPrevious());
+						parent->GetNextRight()->SetPrevious(parent);
+						parent->GetNextRight()->SetNextLeft(temp);
+						temp->SetPrevious(parent->GetNextRight());
+						parent->GetNextRight()->SetParentBrunchDirection("Right");
+
+						if (parent->GetPrevious() == nullptr) m_crown = parent;
+						else
+						{
+							if (parent->GetParentBrunchDirection() == "Left")
+								parent->GetPrevious()->SetNextLeft(parent);
+							else
+								parent->GetPrevious()->SetNextRight(parent);
+						}
+
+						RemoveBalance(parent);
 					}
 				}
 			}
@@ -606,6 +683,7 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					{
 						parent->SetColor(Black);
 						RemoveBalance(deleted);
+						parent->GetPrevious()->SetColor(Red);
 					}
 				}
 				// Right child has Right red child
@@ -694,6 +772,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					temp->SetPrevious(parent->GetNextRight());
 					parent->GetNextRight()->SetParentBrunchDirection("Right");
 
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
+
 					temp = parent->GetNextLeft();
 					temp->SetParentBrunchDirection("Right");
 
@@ -704,6 +791,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					parent->GetNextLeft()->SetNextRight(temp);
 					temp->SetPrevious(parent->GetNextLeft());
 					parent->GetNextLeft()->SetParentBrunchDirection("Left");
+
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
 				}
 			}
 			//Right child is black
@@ -729,6 +825,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					temp->SetPrevious(parent->GetNextRight());
 					parent->GetNextRight()->SetParentBrunchDirection("Right");
 
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
+
 					temp = parent->GetNextLeft();
 					temp->SetParentBrunchDirection("Right");
 
@@ -739,6 +844,15 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					parent->GetNextLeft()->SetNextRight(temp);
 					temp->SetPrevious(parent->GetNextLeft());
 					parent->GetNextLeft()->SetParentBrunchDirection("Left");
+
+					if (parent->GetPrevious() == nullptr) m_crown = parent;
+					else
+					{
+						if (parent->GetParentBrunchDirection() == "Left")
+							parent->GetPrevious()->SetNextLeft(parent);
+						else
+							parent->GetPrevious()->SetNextRight(parent);
+					}
 				}
 				else
 				{
@@ -747,6 +861,34 @@ void RedBlackTree::RemoveBalance(Node* deleted)
 					{
 						parent->SetColor(Red);
 						RemoveBalance(parent->GetPrevious());
+					}
+					// Right grandchild is red
+					else
+					{
+						parent->GetPrevious()->SetColor(Red);
+						parent->GetNextRight()->SetColor(Red);
+
+						Node* temp = parent->GetNextLeft();
+						temp->SetParentBrunchDirection("Right");
+
+						parent->SetParentBrunchDirection(parent->GetPrevious()->GetParentBrunchDirection());
+						parent->SetNextLeft(parent->GetPrevious());
+						parent->SetPrevious(parent->GetPrevious()->GetPrevious());
+						parent->GetNextLeft()->SetPrevious(parent);
+						parent->GetNextLeft()->SetNextRight(temp);
+						temp->SetPrevious(parent->GetNextLeft());
+						parent->GetNextLeft()->SetParentBrunchDirection("Left");
+
+						if (parent->GetPrevious() == nullptr) m_crown = parent;
+						else
+						{
+							if (parent->GetParentBrunchDirection() == "Left")
+								parent->GetPrevious()->SetNextLeft(parent);
+							else
+								parent->GetPrevious()->SetNextRight(parent);
+						}
+
+						RemoveBalance(parent);
 					}
 				}
 			}
