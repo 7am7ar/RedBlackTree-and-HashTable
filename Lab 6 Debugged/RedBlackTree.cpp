@@ -44,8 +44,6 @@ bool RedBlackTree::AddNode(std::string word)
 		Node * currentNode = m_crown;
 		bool isAdded = false;
 
-		m_nodeQuantity++;
-
 		while (!isAdded)
 		{
 			// If current node is leaf
@@ -60,6 +58,7 @@ bool RedBlackTree::AddNode(std::string word)
 				currentNode->SetWord(word);
 				currentNode->SetColor(color);
 
+				m_nodeQuantity++;
 				BalanceTree(currentNode->GetPrevious());
 
 				return true;
@@ -208,6 +207,8 @@ void RedBlackTree::BalanceTree(Node* parent)
 
 bool RedBlackTree::Search(std::string word)
 {
+	std::transform(word.begin(), word.end(), word.begin(), tolower);
+
 	if (m_nodeQuantity == 0)
 	{
 		return false;
@@ -243,6 +244,7 @@ bool RedBlackTree::Search(std::string word)
 
 void RedBlackTree::Clean()
 {
+	if (m_nodeQuantity == 0) return;
 	m_crown->CleanBrunch();
 	m_nodeQuantity = 0;
 }
@@ -260,6 +262,8 @@ void RedBlackTree::Show()
 
 bool RedBlackTree::RemoveNode(std::string word)
 {
+	std::transform(word.begin(), word.end(), word.begin(), tolower);
+
 	// Find node if it is in the tree
 	if (m_nodeQuantity == 0)
 	{

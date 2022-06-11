@@ -1,16 +1,17 @@
 #pragma once
 
-#include <vector>
-#include <utility>
+#include "Element.h"
+#include "Globals.h"
+
 #include <string>
 
 class HashTable
 {
 public:
 	HashTable();
-	void Rehash();
+	void Update(Mode mode);
 	bool Add(std::string word);
-	int AddInto(std::string word, std::vector<std::pair<bool, std::string>>& table);
+	int AddInto(std::string word, Element* table);
 	bool Remove(std::string word);
 	int Search(std::string word);
 	void Show();
@@ -18,8 +19,8 @@ public:
 	void Clean();
 	int Hash(std::string word, int size, int key);
 private:
-	std::vector<std::pair<bool, std::string>> m_table;
-	int m_deleted;
-	int m_hashKey;
+	Element* m_table;
+	int m_deletedSize;
+	int m_size;
+	int m_capacity;
 };
-

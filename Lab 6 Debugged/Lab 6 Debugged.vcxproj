@@ -123,6 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Element.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="Interface.h" />
@@ -130,6 +131,7 @@
     <ClInclude Include="RedBlackTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Element.cpp" />
     <ClCompile Include="HashTable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />

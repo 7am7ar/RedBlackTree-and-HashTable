@@ -6,25 +6,39 @@
 
 HashTable::HashTable() : m_table()
 {
-	m_deleted = 0;
-	m_hashKey = 8;
+	m_capacity = standartSize;
+	m_deletedSize = 0;
+	m_size = 0;
+	m_table = new Element[m_capacity];
+}
+
+int HashTable::Hash(std::string word, int size, int key)
+{
+	int result = 0;
+
+	for (int i = 0; i < word.size(); i++)
+	{
+		result = (key * result + word[i]) % size;
+	}
+	result = (result * 2 + 1) % size;
+
+	if (result < 0) result *= -1;
+
+	return result;
 }
 
 int HashTable::Search(std::string word)
 {
-	int hashOne = Hash(word, m_hashKey, m_hashKey + 1);
-	int hashTwo = Hash(word, m_hashKey, m_hashKey - 1);
+	std::transform(word.begin(), word.end(), word.begin(), tolower);
 
-	for (int i = 0; i < m_hashKey; i++)
+	int hashOne = Hash(word, m_capacity, m_capacity + 1);
+	int hashTwo = Hash(word, m_capacity, m_capacity - 1);
+
+	for (int i = 0; i < m_capacity; i++)
 	{
-		if (hashOne < m_table.size())
-		{
-			if (m_table[hashOne].first)
-			{
-				if (m_table[hashOne].second == word) return hashOne;
-			}
-		}
-		hashOne = (hashOne + hashTwo) % m_hashKey;
+		if (m_table[hashOne].GetState() == Actual && m_table[hashOne].GetData() == word) return hashOne;
+
+		hashOne = (hashOne + hashTwo) % m_capacity;
 	}
 
 	return -1;
@@ -37,93 +51,109 @@ bool HashTable::Remove(std::string word)
 	if (position == -1) return false;
 	else
 	{
-		m_table[position].first = false;
-		m_deleted++;
-		if (m_deleted > m_table.size() / 2) Rehash();
+		m_table[position].SetState(Deleted);
+		m_deletedSize++;
+		m_size--;
+
+		if (m_deletedSize > (m_capacity / 2)) Update(Rehash);
 	}
+}
+
+void HashTable::Update(Mode mode)
+{
+	int previousCapacity = m_capacity;
+
+	if (mode == Resize) m_capacity *= 2;
+
+	Element* newTable = new Element[m_capacity];
+
+	for (int i = 0; i < previousCapacity; i++)
+	{
+		if (m_table[i].GetState() == Actual)
+		{
+			AddInto(m_table[i].GetData(), newTable);
+		}
+	}
+
+	delete[] m_table;
+	m_table = newTable;
+	m_deletedSize = 0;
 }
 
 bool HashTable::Add(std::string word)
 {
+	std::transform(word.begin(), word.end(), word.begin(), tolower);
+
 	int result = AddInto(word, m_table);
 	
-	if (result == -1) return false;
+	if (result == 0) return false;
 	else
 	{
-		if (result == 1) m_deleted--;
+		if (result == 1) m_deletedSize--;
+		else m_size++;
+		
 		return true;
 	}
 }
 
-int HashTable::AddInto(std::string word, std::vector<std::pair<bool, std::string>>& table)
+int HashTable::AddInto(std::string word, Element* table)
 {
-	if (0.75 * m_hashKey < m_table.size()) m_hashKey *= 2;
+	int hashOne = Hash(word, m_capacity, m_capacity + 1);
+	int hashTwo = Hash(word, m_capacity, m_capacity - 1);
 
-	int hashOne = Hash(word, m_hashKey, m_hashKey + 1);
-	int hashTwo = Hash(word, m_hashKey, m_hashKey - 1);
 	int appropriatePosition = -1;
+	int result = -1;
 
-	for (int i = 0; i < m_hashKey; i++)
+	for (int i = 0; i < m_capacity; i++)
 	{
-		if (hashOne < table.size())
+		if (table[hashOne].GetState() == Actual)
 		{
-			if (table[hashOne].first)
+			if (table[hashOne].GetData() == word) return 0;
+		}
+		else
+		{
+			if (appropriatePosition == -1)
 			{
-				if (table[hashOne].second == word) return -1;
-			}
-			else
-			{
-				if (appropriatePosition == -1) appropriatePosition = hashOne;
+				if (table[hashOne].GetState() == Deleted) result = 1;
+				else result = 2;
+				appropriatePosition = hashOne;
 			}
 		}
 
-		hashOne = (hashOne + hashTwo) % m_hashKey;
+		hashOne = (hashOne + hashTwo) % m_capacity;
 	}
 
 	if (appropriatePosition == -1)
 	{
-		table.push_back(std::make_pair(true, word));
+		std::cout << "FUCK YEAH";
 		return 0;
 	}
-	else
-	{
-		table[appropriatePosition].first = true;
-		table[appropriatePosition].second = word;
-		return 1;
-	}
-}
 
-void HashTable::Rehash()
-{
-	std::vector<std::pair<bool, std::string>> table;
+	table[appropriatePosition].SetState(Actual);
+	table[appropriatePosition].SetData(word);
 
-	for (int i = 0; i < m_table.size(); i++)
+	if (resizeValue * m_capacity < m_size)
 	{
-		if (m_table[i].first)
-		{
-			AddInto(table[i].second, table);
-		}
+		Update(Resize);
 	}
 
-	m_table.clear();
-	m_table = table;
-	m_deleted = 0;
+	return result;
 }
 
 void HashTable::Show()
 {
-	if (m_table.size() == 0)
+	if (m_size == 0)
 	{
 		std::cout << "Dictionary is empty\n";
 	}
 
 	int counter = 0;
 
-	for (int i = 0; i < m_table.size(); i++)
+	for (int i = 0; i < m_capacity; i++)
 	{
-		if (m_table[i].first)
+		if (m_table[i].GetState() == Actual)
 		{
-			std::cout << "#" << i - counter << ' ' << m_table[i].second << '\n';
+			std::cout << "#" << i - counter << ' ' << m_table[i].GetData() << '\n';
 		}
 		else counter++;
 	}
@@ -150,23 +180,9 @@ bool HashTable::LoadText(std::string fileName)
 
 void HashTable::Clean()
 {
-	m_deleted = 0;
-	m_hashKey = 8;
-	m_table.clear();
-}
-
-int HashTable::Hash(std::string word, int size, int key)
-{
-	int result = 0;
-
-	if (size == 0)
-	{
-		size++;
-		key++;
-	}
-	for (int i = 0; i < word.size(); i++)
-		result = (key * result + word[i]) % size;
-
-	result = (2 * result + 1) % size;
-	return result;
+	m_capacity = standartSize;
+	m_deletedSize = 0;
+	m_size = 0;
+	delete[] m_table;
+	m_table = new Element[m_capacity];
 }
