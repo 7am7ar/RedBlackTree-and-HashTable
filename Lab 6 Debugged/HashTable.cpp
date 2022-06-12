@@ -153,7 +153,7 @@ void HashTable::Show()
 	{
 		if (m_table[i].GetState() == Actual)
 		{
-			std::cout << "#" << i - counter << ' ' << m_table[i].GetData() << '\n';
+			std::cout << "#" << i - counter << " \"" << m_table[i].GetData() << "\"\n";
 		}
 		else counter++;
 	}

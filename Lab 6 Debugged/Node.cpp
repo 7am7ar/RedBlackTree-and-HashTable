@@ -88,6 +88,11 @@ void Node::ShowBrunch(int number, int& count)
 {
 	if (m_word.empty())
 	{
+		std::cout << '#' << count << " NIL" << "\t\t\t";
+		if (count != 0) std::cout << m_parentBrunchDirection << " from #" << number << '.';
+		else std::cout << "Does not have parent.";
+		std::cout << " Color: " << "Black" << '\n';
+		count++;
 		return;
 	}
 	else
